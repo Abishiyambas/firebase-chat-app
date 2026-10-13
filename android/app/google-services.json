@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "831872663629",
+    "project_id": "pentia-chat-5c03a",
+    "storage_bucket": "pentia-chat-5c03a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:831872663629:android:7c238e70bf532768d21c04",
+        "android_client_info": {
+          "package_name": "dk.abishiyam.pentiachat"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB_Nf6WlWus1r50QuBjXTdSyk5aI0mi5Xc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
