@@ -12,7 +12,20 @@
           "package_name": "dk.abishiyam.pentiachat"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "831872663629-2no66qejrmnh27j0s6qm6sl3mcsvc1up.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "dk.abishiyam.pentiachat",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "831872663629-ebqi2p21jmdj6ci5k0ngp9t764ki5cvb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyB_Nf6WlWus1r50QuBjXTdSyk5aI0mi5Xc"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "831872663629-ebqi2p21jmdj6ci5k0ngp9t764ki5cvb.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "831872663629-5ofpga8cahpjjthpdd813mvfkl812682.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "dk.abishiyam.pentiachat"
+              }
+            }
+          ]
         }
       }
     }
