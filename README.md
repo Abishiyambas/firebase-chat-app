@@ -1,97 +1,87 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# PentiaChat
 
-# Getting Started
+En chat-app i React Native og TypeScript, lavet som Pentias mobile-udviklingsopgave.
+Brugeren logger ind med Google eller Facebook, vælger et af de foruddefinerede chatrum og kan sende og modtage beskeder i realtid. Når et rum åbnes, vises de seneste 50 beskeder, og nye beskeder dukker automatisk op.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+## Funktioner
 
-## Step 1: Start Metro
+| #   | Funktion                                                                 | Status |
+| --- | ------------------------------------------------------------------------ | ------ |
+| 1   | Splash screen, der fader over til login eller chatrum                    | 🚧     |
+| 2   | Login med Google og Facebook (Firebase Auth), fejldialog ved fejl        | 🚧     |
+| 3   | Liste over chatrum sorteret efter nyeste besked, med pull-to-refresh     | 🚧     |
+| 4   | Chatrum: seneste 50 beskeder, scroll for flere, nye beskeder i realtid   | 🚧     |
+| 5   | Push-notifikationer for rum, man har skrevet i, med deep link til rummet | 🚧     |
+| 6   | Upload af billeder fra kamera og galleri                                 | 🚧     |
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+✅ = færdig · 🚧 = under udvikling
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+## Teknologi
 
-```sh
-# Using npm
-npm start
+- **React Native 0.87** (CLI, ikke Expo) med New Architecture og Hermes
+- **TypeScript**
+- **React Navigation 7** (native stack) for native navigation på iOS og Android
+- **React Native Firebase 26** (Auth og Firestore), som bruger de native Firebase-SDK'er
 
-# OR using Yarn
-yarn start
-```
+## Kom i gang
 
-## Step 2: Build and run your app
+### Krav
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+- Node 22.11 eller nyere
+- Xcode (iOS) med Ruby/Bundler og CocoaPods
+- Android Studio med en emulator (Java 17)
 
-### Android
+Se React Natives guide: [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment).
 
-```sh
-# Using npm
-npm run android
+### Installation
 
-# OR using Yarn
-yarn android
-```
+```bash
+git clone git@github.com:Abishiyambas/firebase-chat-app.git
+cd firebase-chat-app
+npm install
 
-### iOS
-
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
-
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
-
-```sh
+# iOS-afhængigheder
+cd ios
 bundle install
-```
-
-Then, and every time you update your native dependencies, run:
-
-```sh
 bundle exec pod install
+cd ..
 ```
 
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
+Firebase-konfigurationsfilerne (`google-services.json` og `GoogleService-Info.plist`) ligger i repoet, så appen virker mod det eksisterende Firebase-projekt uden ekstra
+opsætning.
 
-```sh
-# Using npm
-npm run ios
+### Kør appen
 
-# OR using Yarn
-yarn ios
+Start Metro i en terminal for sig:
+
+```bash
+npx react-native start
 ```
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+Kør så i en anden terminal:
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+```bash
+npx react-native run-ios       # iOS-simulator
+npx react-native run-android   # Android-emulator (skal være startet)
+```
 
-## Step 3: Modify your app
+## Projektstruktur
 
-Now that you have successfully run the app, let's make changes!
+```
+src/
+├── components/   Genbrugelige UI-komponenter (light/dark)
+├── constants/    Farver og andre konstanter
+├── contexts/     Global tilstand (AuthContext, RoomsContext)
+├── hooks/        useAuth, useRooms, useMessages
+├── lib/          Samler Firebase-instanserne
+├── navigation/   RootNavigator, der vælger skærme ud fra login-status
+├── screens/      Én fil pr. skærm
+├── services/     Det eneste lag, der kalder Firebase
+└── types/        Delte TypeScript-typer
+```
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+Skærmene kalder contexts og hooks, contexts kalder services, og kun services kender Firebase.
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
+## Beslutninger
 
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
-
-## Congratulations! :tada:
-
-You've successfully run and modified your React Native App. :partying_face:
-
-### Now what?
-
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
-
-# Troubleshooting
-
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+Arkitektur- og teknikvalg er beskrevet med kontekst, beslutning og konsekvens i [DECISIONS.md](DECISIONS.md).
