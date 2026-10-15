@@ -4,14 +4,13 @@ import SplashScreen from '../screens/SplashScreen';
 import LoginScreen from '../screens/LoginScreen';
 import ChatRoomsScreen from '../screens/ChatRoomsScreen';
 import ChatRoomScreen from '../screens/ChatRoomScreen';
+import { useAuth } from '../hooks/useAuth';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 // Picks Splash, Login or the chat screens based on auth state
 export default function RootNavigator() {
-  // TODO: replace with useAuth()
-  const authChecked = false;
-  const user: { uid: string } | null = null;
+  const { user, authChecked } = useAuth();
 
   return (
     <Stack.Navigator screenOptions={{ animation: 'fade' }}>
