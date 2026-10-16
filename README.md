@@ -5,14 +5,14 @@ Brugeren logger ind med Google eller Facebook, vælger et af de foruddefinerede 
 
 ## Funktioner
 
-| #   | Funktion                                                                 | Status |
-| --- | ------------------------------------------------------------------------ | ------ |
-| 1   | Splash screen, der fader over til login eller chatrum                    | 🚧     |
-| 2   | Login med Google og Facebook (Firebase Auth), fejldialog ved fejl        | 🚧     |
-| 3   | Liste over chatrum sorteret efter nyeste besked, med pull-to-refresh     | 🚧     |
-| 4   | Chatrum: seneste 50 beskeder, scroll for flere, nye beskeder i realtid   | 🚧     |
-| 5   | Push-notifikationer for rum, man har skrevet i, med deep link til rummet | 🚧     |
-| 6   | Upload af billeder fra kamera og galleri                                 | 🚧     |
+| #   | Funktion                                                                 | Status                         |
+| --- | ------------------------------------------------------------------------ | ------------------------------ |
+| 1   | Splash screen, der fader over til login eller chatrum                    | ✅                             |
+| 2   | Login med Google og Facebook (Firebase Auth), fejldialog ved fejl        | 🚧 Google ✅, Facebook mangler |
+| 3   | Liste over chatrum sorteret efter nyeste besked, med pull-to-refresh     | 🚧                             |
+| 4   | Chatrum: seneste 50 beskeder, scroll for flere, nye beskeder i realtid   | 🚧                             |
+| 5   | Push-notifikationer for rum, man har skrevet i, med deep link til rummet | 🚧                             |
+| 6   | Upload af billeder fra kamera og galleri                                 | 🚧                             |
 
 ✅ = færdig · 🚧 = under udvikling
 
@@ -22,6 +22,7 @@ Brugeren logger ind med Google eller Facebook, vælger et af de foruddefinerede 
 - **TypeScript**
 - **React Navigation 7** (native stack) for native navigation på iOS og Android
 - **React Native Firebase 26** (Auth og Firestore), som bruger de native Firebase-SDK'er
+- **Google Sign-In** (`@react-native-google-signin/google-signin`) til det native Google-login
 
 ## Kom i gang
 

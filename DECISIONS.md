@@ -225,10 +225,63 @@ Alle pods bruger nu samme minimum som React Native.
 
 ---
 
+## 10. Auth-flow: lytter i contexten, navigation styret af login-status
+
+**Dato:** 2026-10-16
+
+**Kontekst:** Splash skal vises, mens appen finder ud af, om brugeren er logget ind, og derefter fade til Login eller ChatRooms. I Shelfie blev brugeren hentet én gang ved opstart (`getInitialUserValue`), og login-skærmen navigerede selv videre bagefter.
+
+**Beslutning:**
+
+- Lagene bygger oven på hinanden: `lib/firebase` → `authService` → `AuthContext` → `useAuth` → skærme.
+- `AuthContext` lytter med `onAuthStateChanged`. Firebase kalder lytteren ved opstart, login og logout, og contexten sætter `user` og `authChecked`. Lytteren afmeldes i `useEffect`'s oprydning.
+- `authChecked` er Splash-skærmens signal: den bliver `true` første gang lytteren kaldes, uanset om der er en bruger.
+- **Skærmene navigerer ikke selv efter login/logout.** `RootNavigator` vælger skærme ud fra `user`, så login-skærmen kalder kun `signInWithGoogle()`. Når Firebase melder den nye bruger, skifter navigatoren automatisk.
+- **Fejlhåndtering:** `authService` kaster fejl, og `LoginScreen` viser dem med en native `Alert`. Annulleret login er ikke en fejl og viser ingen dialog.
+- `useAuth` kaster en tydelig fejl, hvis den bruges uden for `AuthProvider`.
+- Provider-rækkefølge i `App.tsx`: `SafeAreaProvider` → `AuthProvider` → `NavigationContainer`. Login-status er mere grundlæggende end navigation og skal senere kunne bruges af push-håndtering uden for navigatoren.
+
+**Konsekvens:**
+
+- Der er ét sted, der bestemmer, hvilken skærm der vises. Det samme flow virker ved koldstart, login og logout.
+- En bruger, der ikke er logget ind, kan ikke navigere til chatrummene, fordi skærmene slet ikke findes i navigatoren.
+
+---
+
+## 11. Datamodel i Firestore
+
+**Dato:** 2026-10-16
+
+**Kontekst:** Opgaven kræver foruddefinerede rum sorteret efter nyeste besked og de seneste 50 beskeder pr. rum med mulighed for at hente flere.
+
+**Beslutning:**
+
+```
+rooms/{roomId}
+  name: string
+  description: string
+  lastMessageAt: timestamp
+  messages/{messageId}   (sub-collection)
+```
+
+- **`lastMessageAt` gemmes på selve rummet** og opdateres, når der skrives en besked. Så kan listen sorteres med én forespørgsel (`orderBy('lastMessageAt', 'desc')`) i stedet for at slå den nyeste besked op i hvert rum. Data gemmes, som den skal læses.
+- **Beskeder er en sub-collection** under rummet. Det gør det let at hente de seneste 50 i ét rum og at lave sideinddeling.
+- Rummene er oprettet i Firebase-konsollen, da de er foruddefinerede.
+- **Service-laget oversætter data:** `roomsService` lægger dokument-id'et på som `id` og konverterer Firestores `Timestamp` til JavaScripts `Date`. Typen `Room` indeholder derfor ingen Firebase-typer, og skærmene skal ikke kende Firestore.
+- Collection-navne er konstanter i servicen (`ROOMS_COLLECTION`) i stedet for strenge spredt rundt i koden.
+- **Midlertidige Security Rules:** indloggede brugere kan læse rum og læse/oprette beskeder. De strammes op, før appen afleveres.
+
+**Konsekvens:**
+
+- Én billig forespørgsel til rumlisten.
+- `lastMessageAt` skal holdes opdateret, når der sendes en besked, og reglerne skal tillade netop den opdatering.
+
+---
+
 ## Kommende beslutninger (skrives, når de træffes)
 
-- Splash og auth-flow i `RootNavigator` (fade-animation, `onAuthStateChanged`).
-- Facebook-login.
-- Datamodel i Firestore (rooms, messages, sortering efter nyeste besked, pagination).
+- Rum-state: `RoomsContext` og pull-to-refresh.
+- Beskeder i realtid og sideinddeling.
 - Push og deep links.
-- Security Rules.
+- Endelige Security Rules.
+- Facebook-login.
