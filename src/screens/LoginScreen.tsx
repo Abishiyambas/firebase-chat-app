@@ -1,5 +1,3 @@
-
-
 import { useState } from 'react';
 import { Alert, StyleSheet, View } from 'react-native';
 import { useAuth } from '../hooks/useAuth';
