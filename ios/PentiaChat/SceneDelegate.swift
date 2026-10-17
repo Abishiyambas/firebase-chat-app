@@ -1,6 +1,7 @@
 import UIKit
 import React
 import React_RCTAppDelegate
+import FBSDKCoreKit
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
   var window: UIWindow?
@@ -32,9 +33,19 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     window.makeKeyAndVisible()
   }
 
-  // Deep links while the app is running are forwarded to React Native's Linking
+  // Links while the app is running: Facebook's login callback first,
+  // everything else (pentiachat://) goes to React Native's Linking
   func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
     guard let url = URLContexts.first?.url else { return }
+
+    if ApplicationDelegate.shared.application(
+      UIApplication.shared,
+      open: url,
+      sourceApplication: nil,
+      annotation: [UIApplication.OpenURLOptionsKey.annotation]
+    ) {
+      return
+    }
     RCTLinkingManager.application(UIApplication.shared, open: url, options: [:])
   }
 }

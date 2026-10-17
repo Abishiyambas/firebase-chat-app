@@ -1,12 +1,17 @@
 import { createContext, useEffect, useState, type ReactNode } from 'react';
 import { onAuthStateChanged, type User } from '@react-native-firebase/auth';
-import { signInWithGoogle, logOut } from '../services/authService';
+import {
+  logOut,
+  signInWithFacebook,
+  signInWithGoogle,
+} from '../services/authService';
 import { auth } from '../lib/firebase';
 
 type AuthContextValue = {
   user: User | null;
   authChecked: boolean;
   signInWithGoogle: () => Promise<void>;
+  signInWithFacebook: () => Promise<void>;
   logOut: () => Promise<void>;
 };
 
@@ -29,7 +34,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, authChecked, signInWithGoogle, logOut }}
+      value={{
+        user,
+        authChecked,
+        signInWithGoogle,
+        signInWithFacebook,
+        logOut,
+      }}
     >
       {children}
     </AuthContext.Provider>
