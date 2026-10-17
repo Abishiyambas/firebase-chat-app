@@ -1,0 +1,28 @@
+rules_version = '2';
+
+// Security rules for PentiaChat. Paste into Firebase console → Firestore → Rules.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Predefined rooms: signed-in users can read them, and may only bump
+    // lastMessageAt to the server time when they send a message
+    match /rooms/{roomId} {
+      allow read: if request.auth != null;
+      allow update: if request.auth != null
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastMessageAt'])
+        && request.resource.data.lastMessageAt == request.time;
+
+      // Messages: anyone signed in can read; you can only post as yourself,
+      // with non-empty text and the server time. No edits or deletes
+      match /messages/{messageId} {
+        allow read: if request.auth != null;
+        allow create: if request.auth != null
+          && request.resource.data.userId == request.auth.uid
+          && request.resource.data.text is string
+          && request.resource.data.text.size() > 0
+          && request.resource.data.text.size() <= 1000
+          && request.resource.data.createdAt == request.time;
+      }
+    }
+  }
+}
