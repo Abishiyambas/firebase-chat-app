@@ -34,6 +34,14 @@
 				<string>com.googleusercontent.apps.831872663629-5ofpga8cahpjjthpdd813mvfkl812682</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>dk.abishiyam.pentiachat</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>pentiachat</string>
+			</array>
+		</dict>
 	</array>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
