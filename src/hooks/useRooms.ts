@@ -1,12 +1,12 @@
 import { useContext } from 'react';
 import { RoomsContext } from '../contexts/RoomsContext';
 
-//You can only use the RoomContext with in in the RoomsProvider. Otherwise there will be thrown an error
+// Gives access to the rooms context. Throws if used outside a RoomsProvider
 export function useRooms() {
   const context = useContext(RoomsContext);
 
   if (!context) {
-    throw new Error('useRooms must be used within a RoomProvider');
+    throw new Error('useRooms must be used within a RoomsProvider');
   }
 
   return context;
