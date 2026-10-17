@@ -26,7 +26,8 @@ function toMessage(snapshot: QueryDocumentSnapshot): Message {
   const data = snapshot.data();
   return {
     id: snapshot.id,
-    text: data.text,
+    text: data.text ?? '',
+    image: data.image ?? null,
     createdAt: data.createdAt?.toDate() ?? null,
     userId: data.userId,
     userName: data.userName,
@@ -68,9 +69,12 @@ export async function getOlderMessages(
   return snapshot.docs.map(toMessage);
 }
 
-// Sends a message as the signed-in user and moves the room to the top of the list.
+// Writes a message as the signed-in user and moves the room to the top of the list.
 // Both writes happen in one batch, so either both succeed or neither does
-export async function sendMessage(roomId: string, text: string): Promise<void> {
+async function writeMessage(
+  roomId: string,
+  content: { text: string; image: string | null },
+): Promise<void> {
   const user = auth.currentUser;
   if (!user) {
     throw new Error('You must be signed in to send a message');
@@ -82,7 +86,8 @@ export async function sendMessage(roomId: string, text: string): Promise<void> {
   );
 
   batch.set(messageRef, {
-    text,
+    text: content.text,
+    image: content.image,
     createdAt: serverTimestamp(),
     userId: user.uid,
     userName: user.displayName ?? 'Anonymous',
@@ -93,4 +98,15 @@ export async function sendMessage(roomId: string, text: string): Promise<void> {
   });
 
   await batch.commit();
+}
+
+// Sends a text message
+export function sendMessage(roomId: string, text: string): Promise<void> {
+  return writeMessage(roomId, { text, image: null });
+}
+
+// Sends an image message. The image is a small, compressed data URI stored in
+// the message itself (Firebase Storage needs the paid Blaze plan)
+export function sendImageMessage(roomId: string, image: string): Promise<void> {
+  return writeMessage(roomId, { text: '', image });
 }

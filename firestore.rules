@@ -13,14 +13,18 @@ service cloud.firestore {
         && request.resource.data.lastMessageAt == request.time;
 
       // Messages: anyone signed in can read; you can only post as yourself,
-      // with non-empty text and the server time. No edits or deletes
+      // with text and/or a small image and the server time. No edits or deletes
       match /messages/{messageId} {
         allow read: if request.auth != null;
         allow create: if request.auth != null
           && request.resource.data.userId == request.auth.uid
           && request.resource.data.text is string
-          && request.resource.data.text.size() > 0
           && request.resource.data.text.size() <= 1000
+          && (request.resource.data.image == null
+            || (request.resource.data.image is string
+              && request.resource.data.image.size() < 750000))
+          && (request.resource.data.text.size() > 0
+            || request.resource.data.image != null)
           && request.resource.data.createdAt == request.time;
       }
     }
