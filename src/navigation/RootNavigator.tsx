@@ -5,6 +5,7 @@ import LoginScreen from '../screens/LoginScreen';
 import ChatRoomsScreen from '../screens/ChatRoomsScreen';
 import ChatRoomScreen from '../screens/ChatRoomScreen';
 import { useAuth } from '../hooks/useAuth';
+import LogOutButton from '../components/LogOutButton';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -20,7 +21,11 @@ export default function RootNavigator() {
         <Stack.Screen name="Login" component={LoginScreen} />
       ) : (
         <>
-          <Stack.Screen name="ChatRooms" component={ChatRoomsScreen} />
+          <Stack.Screen
+            name="ChatRooms"
+            component={ChatRoomsScreen}
+            options={{ headerRight: LogOutButton }}
+          />
           <Stack.Screen name="ChatRoom" component={ChatRoomScreen} />
         </>
       )}
