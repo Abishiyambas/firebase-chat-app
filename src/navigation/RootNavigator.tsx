@@ -21,9 +21,17 @@ export default function RootNavigator() {
       UNSTABLE_routeNamesChangeBehavior="lastUnhandled"
     >
       {!authChecked ? (
-        <Stack.Screen name="Splash" component={SplashScreen} />
+        <Stack.Screen
+          name="Splash"
+          component={SplashScreen}
+          options={{ headerShown: false }}
+        />
       ) : !user ? (
-        <Stack.Screen name="Login" component={LoginScreen} />
+        <Stack.Screen
+          name="Login"
+          component={LoginScreen}
+          options={{ headerShown: false }}
+        />
       ) : (
         <>
           <Stack.Screen
