@@ -344,7 +344,46 @@ rooms/{roomId}
 
 ---
 
-## Ikke nået
+## 16. Splash-skærm
 
-- Facebook-login.
-- Billedupload fra kamera og galleri.
+**Dato:** 2026-10-18
+
+**Beslutning:** Splash vises, så længe `authChecked` er `false`, uden header, med app-navn og en spinner i appens farve. Login-skærmen har heller ingen header, men viser appens navn. `RootNavigator`'s `fade`-animation står for overgangen til Login eller ChatRooms.
+
+---
+
+## 17. Billeder gemmes komprimeret i Firestore
+
+**Dato:** 2026-10-18
+
+**Kontekst:** Opgaven kræver upload fra kamera og galleri, vist i samme flow som beskeder. Firebase Storage kræver Blaze-planen for nye projekter, og den er ikke aktiveret.
+
+**Beslutning:**
+
+- `react-native-image-picker` åbner kamera eller fotobibliotek. Billedet skaleres til maks. 800×800 og 60 % kvalitet og returneres som base64.
+- Billedet gemmes som en `data:`-URI i feltet `image` på beskeden. Det går gennem samme `writeBatch` som tekstbeskeder, så rummet også flyttes op i listen.
+- `imagePickerService` kender kun picker-biblioteket og ikke Firebase. Skærmen kalder picker → `sendImageMessage`.
+- Security Rules: en besked skal have tekst eller billede, og billedet skal være under ca. 750 KB (Firestores dokumentgrænse er 1 MB).
+
+**Konsekvens:**
+
+- Det virker uden betalt plan og er realtid ligesom tekst.
+- Ulempe: større dokumenter, og hentning af 50 beskeder kan blive tungere, hvis mange er billeder. Med Blaze ville billedet ligge i Storage, og beskeden kun indeholde en URL. Det er en lille ændring i `messagesService`.
+
+---
+
+## 18. Facebook-login
+
+**Dato:** 2026-10-18
+
+**Beslutning:**
+
+- `react-native-fbsdk-next` står for det native Facebook-login. Resultatet laves til et `FacebookAuthProvider.credential` og gives til Firebase, ligesom Google-login.
+- **iOS bruger Limited Login:** Facebooks iOS-SDK giver kun et klassisk access token, hvis brugeren har givet tilladelse til tracking (ATT). Uden det fås et ID-token. Appen sender en SHA-256-hashet nonce med og giver Firebase både token og den rå nonce, så Firebase kan verificere, at tokenet hører til netop dette login.
+- **Android** bruger det klassiske access token.
+- `logOut` logger kun ud af den udbyder, brugeren faktisk loggede ind med (aflæst fra `providerData`).
+- iOS: Facebook-SDK'et initialiseres i `AppDelegate`. Login-callbacks håndteres i `SceneDelegate` **før** React Natives deep links, så Facebooks URL ikke opfattes som et app-link.
+- App ID og Client token ligger i `Info.plist` og `strings.xml`. De er ikke hemmelige. App secret ligger kun i Firebase.
+- Firebase er sat til "én konto pr. udbyder", så samme e-mail kan bruges til både Google og Facebook uden konflikt.
+
+**Konsekvens:** Meta-appen er i Development mode, så kun administratorer og testere kan logge ind med Facebook, indtil Meta har godkendt appen (App Review + Business verification).

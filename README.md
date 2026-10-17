@@ -5,14 +5,14 @@ Brugeren logger ind med Google eller Facebook, vælger et af de foruddefinerede 
 
 ## Funktioner
 
-| #   | Funktion                                                                 | Status                         |
-| --- | ------------------------------------------------------------------------ | ------------------------------ |
-| 1   | Splash screen, der fader over til login eller chatrum                    | ✅                             |
-| 2   | Login med Google og Facebook (Firebase Auth), fejldialog ved fejl        | 🚧 Google ✅, Facebook mangler |
-| 3   | Liste over chatrum sorteret efter nyeste besked, med pull-to-refresh     | ✅                             |
-| 4   | Chatrum: seneste 50 beskeder, scroll for flere, nye beskeder i realtid   | ✅                             |
-| 5   | Push-notifikationer for rum, man har skrevet i, med deep link til rummet | ✅ Android (se Push nedenfor)  |
-| 6   | Upload af billeder fra kamera og galleri                                 | ❌ Ikke nået                   |
+| #   | Funktion                                                                 | Status                        |
+| --- | ------------------------------------------------------------------------ | ----------------------------- |
+| 1   | Splash screen, der fader over til login eller chatrum                    | ✅                            |
+| 2   | Login med Google og Facebook (Firebase Auth), fejldialog ved fejl        | ✅                            |
+| 3   | Liste over chatrum sorteret efter nyeste besked, med pull-to-refresh     | ✅                            |
+| 4   | Chatrum: seneste 50 beskeder, scroll for flere, nye beskeder i realtid   | ✅                            |
+| 5   | Push-notifikationer for rum, man har skrevet i, med deep link til rummet | ✅ Android (se Push nedenfor) |
+| 6   | Upload af billeder fra kamera og galleri                                 | ✅ (se Billeder nedenfor)     |
 
 ✅ = færdig · 🚧 = delvist · ❌ = ikke nået
 
@@ -23,6 +23,8 @@ Brugeren logger ind med Google eller Facebook, vælger et af de foruddefinerede 
 - **React Navigation 7** (native stack) for native navigation på iOS og Android
 - **React Native Firebase 26** (Auth, Firestore og Cloud Messaging), som bruger de native Firebase-SDK'er
 - **Google Sign-In** (`@react-native-google-signin/google-signin`) til det native Google-login
+- **Facebook SDK** (`react-native-fbsdk-next`) til Facebook-login
+- **Image Picker** (`react-native-image-picker`) til kamera og fotobibliotek
 
 ## Kom i gang
 
@@ -82,6 +84,18 @@ npx react-native run-android   # Android-emulator (skal være startet)
 - **Afsendelse af push sker manuelt fra Firebase-konsollen** (Messaging → ny kampagne → målgruppe _Topic_ `room_<roomId>` → ekstra data `roomId`). Automatisk afsendelse ved nye beskeder kræver en Cloud Function, og den kræver Firebase Blaze-planen, som ikke er aktiveret i dette projekt. Funktionen ville lytte på `rooms/{roomId}/messages/{messageId}` og sende til topic'et.
 - **iOS-push kræver en APNs-nøgle** fra Apple Developer Program (betalt). Koden, tilladelsen og deep links er lavet til iOS, men push er kun vist på Android.
 
+## Billeder
+
+- Tryk **+** i chatten → _Take photo_ eller _Choose from library_.
+- Billedet skaleres ned (maks. 800×800, 60 % kvalitet) og gemmes som en lille `data:`-URI direkte i beskeden i Firestore. Security Rules afviser billeder over ca. 750 KB.
+- **Afgrænsning:** Firebase Storage ville være det normale valg til billeder, men kræver Blaze-planen for nye projekter. Billederne vises i samme flow som tekstbeskeder.
+- iOS-simulatoren har intet kamera. Brug fotobiblioteket der, eller Android-emulatorens virtuelle kamera.
+
+## Facebook-login
+
+- Meta-appen er i **Development mode**, så kun app-administratorer og testere kan logge ind med Facebook, indtil appen er gennemgået og udgivet af Meta.
+- iOS bruger Facebook _Limited Login_ (ID-token + nonce), Android et klassisk access token. Begge laves om til et Firebase-credential.
+
 ## Projektstruktur
 
 ```
@@ -92,7 +106,7 @@ src/
 ├── lib/          Samler Firebase-instanserne (auth, db, messaging)
 ├── navigation/   RootNavigator (vælger skærme ud fra login-status) og deep link-opsætning
 ├── screens/      Én fil pr. skærm
-├── services/     Det eneste lag, der kalder Firebase (auth, rooms, messages, notifications)
+├── services/     Det eneste lag, der kalder Firebase og native SDK'er (auth, rooms, messages, notifications, image picker)
 └── types/        Delte TypeScript-typer
 ```
 
