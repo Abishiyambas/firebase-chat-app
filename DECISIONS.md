@@ -278,10 +278,73 @@ rooms/{roomId}
 
 ---
 
-## Kommende beslutninger (skrives, når de træffes)
+## 12. Rum-liste: `RoomsContext` med pull-to-refresh
 
-- Rum-state: `RoomsContext` og pull-to-refresh.
-- Beskeder i realtid og sideinddeling.
-- Push og deep links.
-- Endelige Security Rules.
+**Dato:** 2026-10-17
+
+**Beslutning:**
+
+- `RoomsContext` holder listen og en `refreshRooms()`, der henter den igen med `getDocs`. Listen **erstattes** hver gang (ingen dubletter som i Shelfie).
+- `refreshRooms` fanger ikke fejl (`try/finally`). Skærmen kalder den ved åbning og ved pull-to-refresh og viser fejl med `Alert`.
+- `refreshRooms` er pakket i `useCallback`, så funktionen er stabil. Ellers ville skærmens `useEffect` køre igen efter hver opdatering af listen og give en uendelig løkke.
+- Context frem for lokal state, fordi både listen og chatskærmens titel bruger rummene.
+- Log ud-knappen er en egen komponent, der sættes som `headerRight` i navigatoren, så den bruger platformens native header.
+
+---
+
+## 13. Beskeder i realtid og sideinddeling
+
+**Dato:** 2026-10-17
+
+**Beslutning:**
+
+- `subscribeToMessages` bruger `onSnapshot` på de 50 nyeste (`orderBy('createdAt', 'desc')` + `limit(50)`). Ældre sider hentes én gang ad gangen med `startAfter` på den ældste kendte besked.
+- `useMessages(roomId)` er et hook og ikke en context, fordi beskederne hører til ét rum og én skærm. Lytteren afmeldes i `useEffect`'s oprydning, når man forlader rummet.
+- Nye snapshots **flettes** ind efter id i stedet for at erstatte listen. Når en ny besked kommer, glider den ældste ud af "live"-vinduet på 50. Med fletning forsvinder den ikke fra skærmen.
+- Listen er en omvendt (`inverted`) `FlatList`: nyeste nederst, og at nå "enden" betyder at scrolle op, hvilket henter ældre beskeder.
+- Afsenderens navn og avatar gemmes i selve beskeden, så listen ikke skal slå brugere op.
+- `createdAt` er `serverTimestamp()`, så alle enheder bruger serverens ur. Indtil serveren har svaret, vises "Sending…".
+- **Afsendelse er én `writeBatch`:** beskeden oprettes og rummets `lastMessageAt` opdateres i samme operation. Enten lykkes begge, eller ingen af dem, så listesorteringen aldrig kommer ud af trit med beskederne.
+
+---
+
+## 14. Security Rules
+
+**Dato:** 2026-10-17
+
+**Beslutning:** Reglerne ligger i `firestore.rules` i repoet og publiceres i Firebase-konsollen.
+
+- Alt kræver login.
+- Beskeder kan kun oprettes **som en selv** (`userId == request.auth.uid`), med 1–1000 tegn og server-tid. De kan ikke redigeres eller slettes.
+- Et rum kan kun få ændret `lastMessageAt`, og kun til server-tid. Navn og beskrivelse kan ikke ændres fra appen.
+- Svarene om notifikationer (`users/{uid}/roomNotifications`) kan kun læses og skrives af brugeren selv.
+
+---
+
+## 15. Push-notifikationer og deep links
+
+**Dato:** 2026-10-17
+
+**Kontekst:** Opgaven kræver, at man første gang man skriver i et rum bliver spurgt, om man vil have notifikationer fra rummet, at der sendes push ved nye beskeder, og at et tryk åbner rummet via deep link. Projektet er på Firebase Spark-planen (ingen Cloud Functions), og der er intet betalt Apple Developer-medlemskab (ingen APNs-nøgle).
+
+**Beslutning:**
+
+- **Ét FCM-topic pr. rum** (`room_<roomId>`). Enheden tilmelder sig topic'et, når brugeren siger ja. Så skal der ikke gemmes og vedligeholdes device-tokens, og en afsender skal bare kende rummets id.
+- Spørgsmålet stilles efter første afsendte besked i rummet (`useRoomNotificationPrompt`). Svaret gemmes i Firestore pr. bruger og rum, så der kun spørges én gang, også efter genstart.
+- Systemtilladelsen: `POST_NOTIFICATIONS` på Android 13+ via `PermissionsAndroid`, `requestPermission` på iOS.
+- **Deep links** (`pentiachat://room/<roomId>`) går gennem React Navigations `linking`. En notifikation med `roomId` i data omsættes til samme link, både når appen kører (`onNotificationOpenedApp`), og når den startes af notifikationen (`getInitialNotification`). `initialRouteName: 'ChatRooms'` sikrer, at tilbage-knappen virker.
+- `UNSTABLE_routeNamesChangeBehavior="lastUnhandled"` på navigatoren: Hvis linket kommer, mens Splash/Login vises, gemmes det og åbnes, når brugeren er logget ind.
+- **iOS:** Med UIScene kommer links ikke til `AppDelegate`. `SceneDelegate` sender dem videre til `RCTLinkingManager` (kørende app) og som launch options (koldstart).
+
+**Konsekvens / afgrænsning:**
+
+- Push afsendes manuelt fra Firebase-konsollen til et rum-topic. En Cloud Function, der lytter på nye beskeder og sender til topic'et, er næste skridt, når projektet er på Blaze.
+- Push er vist på Android. iOS mangler kun en APNs-nøgle i Firebase.
+- Med topics får afsenderen også sin egen push. Det kan undgås med en Cloud Function, der sender til device-tokens i stedet.
+
+---
+
+## Ikke nået
+
 - Facebook-login.
+- Billedupload fra kamera og galleri.

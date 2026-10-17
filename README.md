@@ -9,19 +9,19 @@ Brugeren logger ind med Google eller Facebook, vælger et af de foruddefinerede 
 | --- | ------------------------------------------------------------------------ | ------------------------------ |
 | 1   | Splash screen, der fader over til login eller chatrum                    | ✅                             |
 | 2   | Login med Google og Facebook (Firebase Auth), fejldialog ved fejl        | 🚧 Google ✅, Facebook mangler |
-| 3   | Liste over chatrum sorteret efter nyeste besked, med pull-to-refresh     | 🚧                             |
-| 4   | Chatrum: seneste 50 beskeder, scroll for flere, nye beskeder i realtid   | 🚧                             |
-| 5   | Push-notifikationer for rum, man har skrevet i, med deep link til rummet | 🚧                             |
-| 6   | Upload af billeder fra kamera og galleri                                 | 🚧                             |
+| 3   | Liste over chatrum sorteret efter nyeste besked, med pull-to-refresh     | ✅                             |
+| 4   | Chatrum: seneste 50 beskeder, scroll for flere, nye beskeder i realtid   | ✅                             |
+| 5   | Push-notifikationer for rum, man har skrevet i, med deep link til rummet | ✅ Android (se Push nedenfor)  |
+| 6   | Upload af billeder fra kamera og galleri                                 | ❌ Ikke nået                   |
 
-✅ = færdig · 🚧 = under udvikling
+✅ = færdig · 🚧 = delvist · ❌ = ikke nået
 
 ## Teknologi
 
 - **React Native 0.87** (CLI, ikke Expo) med New Architecture og Hermes
 - **TypeScript**
 - **React Navigation 7** (native stack) for native navigation på iOS og Android
-- **React Native Firebase 26** (Auth og Firestore), som bruger de native Firebase-SDK'er
+- **React Native Firebase 26** (Auth, Firestore og Cloud Messaging), som bruger de native Firebase-SDK'er
 - **Google Sign-In** (`@react-native-google-signin/google-signin`) til det native Google-login
 
 ## Kom i gang
@@ -66,22 +66,39 @@ npx react-native run-ios       # iOS-simulator
 npx react-native run-android   # Android-emulator (skal være startet)
 ```
 
+## Push-notifikationer og deep links
+
+- Første gang man skriver i et rum, spørger appen, om man vil have notifikationer fra rummet. Svaret gemmes pr. bruger og rum i Firestore (`users/{uid}/roomNotifications/{roomId}`), så der kun spørges én gang.
+- Siger man ja, beder appen om systemets tilladelse og tilmelder enheden FCM-topic'et `room_<roomId>`.
+- En notifikation med data-feltet `roomId` åbner rummet direkte, når man trykker på den. Den omsættes til deep linket `pentiachat://room/<roomId>` via React Navigations `linking`, både når appen kører, ligger i baggrunden og er lukket.
+- Deep links kan også testes uden push:
+  ```bash
+  adb shell am start -a android.intent.action.VIEW -d "pentiachat://room/<roomId>"   # Android
+  xcrun simctl openurl booted "pentiachat://room/<roomId>"                            # iOS
+  ```
+
+**Afgrænsninger (ærligt):**
+
+- **Afsendelse af push sker manuelt fra Firebase-konsollen** (Messaging → ny kampagne → målgruppe _Topic_ `room_<roomId>` → ekstra data `roomId`). Automatisk afsendelse ved nye beskeder kræver en Cloud Function, og den kræver Firebase Blaze-planen, som ikke er aktiveret i dette projekt. Funktionen ville lytte på `rooms/{roomId}/messages/{messageId}` og sende til topic'et.
+- **iOS-push kræver en APNs-nøgle** fra Apple Developer Program (betalt). Koden, tilladelsen og deep links er lavet til iOS, men push er kun vist på Android.
+
 ## Projektstruktur
 
 ```
 src/
-├── components/   Genbrugelige UI-komponenter (light/dark)
-├── constants/    Farver og andre konstanter
+├── components/   Genbrugelige UI-dele (LogOutButton, MessageItem)
 ├── contexts/     Global tilstand (AuthContext, RoomsContext)
-├── hooks/        useAuth, useRooms, useMessages
-├── lib/          Samler Firebase-instanserne
-├── navigation/   RootNavigator, der vælger skærme ud fra login-status
+├── hooks/        useAuth, useRooms, useMessages, useRoomNotificationPrompt
+├── lib/          Samler Firebase-instanserne (auth, db, messaging)
+├── navigation/   RootNavigator (vælger skærme ud fra login-status) og deep link-opsætning
 ├── screens/      Én fil pr. skærm
-├── services/     Det eneste lag, der kalder Firebase
+├── services/     Det eneste lag, der kalder Firebase (auth, rooms, messages, notifications)
 └── types/        Delte TypeScript-typer
 ```
 
-Skærmene kalder contexts og hooks, contexts kalder services, og kun services kender Firebase.
+Skærmene kalder contexts og hooks, contexts og hooks kalder services, og kun services kender Firebase.
+
+Firestores sikkerhedsregler ligger i [`firestore.rules`](firestore.rules).
 
 ## Beslutninger
 
