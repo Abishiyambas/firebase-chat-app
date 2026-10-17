@@ -14,6 +14,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useHeaderHeight } from '@react-navigation/elements';
 import MessageItem from '../components/MessageItem';
 import { useMessages } from '../hooks/useMessages';
+import { useRoomNotificationPrompt } from '../hooks/useRoomNotificationPrompt';
 import { useRooms } from '../hooks/useRooms';
 import { sendMessage } from '../services/messagesService';
 import type { ScreenProps } from '../types/navigation';
@@ -30,7 +31,7 @@ export default function ChatRoomScreen({
   route,
 }: ScreenProps<'ChatRoom'>) {
   const { roomId } = route.params;
-  const { rooms } = useRooms();
+  const { rooms, refreshRooms } = useRooms();
   const { messages, loading, loadingOlder, error, loadOlder } =
     useMessages(roomId);
   const [text, setText] = useState('');
@@ -43,6 +44,21 @@ export default function ChatRoomScreen({
   useLayoutEffect(() => {
     navigation.setOptions({ title: room?.name ?? 'Chat' });
   }, [navigation, room?.name]);
+
+  // Opened from a deep link before the rooms list was loaded: fetch it for the title
+  const roomMissing = !room;
+  useEffect(() => {
+    if (roomMissing) {
+      refreshRooms().catch(() => {
+        // The title falls back to "Chat"; the messages still work
+      });
+    }
+  }, [roomMissing, refreshRooms]);
+
+  const askForNotifications = useRoomNotificationPrompt(
+    roomId,
+    room?.name ?? 'this room',
+  );
 
   // The list is inverted, so reaching the "end" means scrolling up to older messages
   const handleEndReached = useCallback(() => {
@@ -61,6 +77,10 @@ export default function ChatRoomScreen({
     try {
       await sendMessage(roomId, trimmed);
       setText('');
+      // First message in this room: ask about push notifications (task requirement)
+      askForNotifications().catch(notificationError =>
+        showError('Could not turn on notifications', notificationError),
+      );
     } catch (sendError) {
       showError('Could not send message', sendError);
     } finally {

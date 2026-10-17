@@ -1222,6 +1222,9 @@ PODS:
   - Firebase/Firestore (12.18.0):
     - Firebase/CoreOnly
     - FirebaseFirestore (~> 12.18.0)
+  - Firebase/Messaging (12.18.0):
+    - Firebase/CoreOnly
+    - FirebaseMessaging (~> 12.18.0)
   - FirebaseAppCheckInterop (12.18.0)
   - FirebaseAuth (12.18.0):
     - FirebaseAppCheckInterop (~> 12.18.0)
@@ -1261,11 +1264,28 @@ PODS:
     - gRPC-Core (~> 1.69.0)
     - leveldb-library (~> 1.22)
     - nanopb (~> 3.30910.0)
+  - FirebaseInstallations (12.18.0):
+    - FirebaseCore (~> 12.18.0)
+    - GoogleUtilities/Environment (~> 8.1)
+    - GoogleUtilities/UserDefaults (~> 8.1)
+    - PromisesObjC (~> 2.4)
+  - FirebaseMessaging (12.18.0):
+    - FirebaseCore (~> 12.18.0)
+    - FirebaseInstallations (~> 12.18.0)
+    - GoogleDataTransport (~> 10.1)
+    - GoogleUtilities/AppDelegateSwizzler (~> 8.1)
+    - GoogleUtilities/Environment (~> 8.1)
+    - GoogleUtilities/Reachability (~> 8.1)
+    - GoogleUtilities/UserDefaults (~> 8.1)
+    - nanopb (~> 3.30910.0)
   - FirebaseSharedSwift (12.18.0)
   - fmt (12.1.0):
     - ReactNativeDependencies
   - glog (0.3.5):
     - ReactNativeDependencies
+  - GoogleDataTransport (10.1.1):
+    - nanopb (~> 3.30910.0)
+    - PromisesObjC (~> 2.4)
   - GoogleSignIn (9.2.0):
     - AppAuth (~> 2.1)
     - AppCheckCore (~> 11.0)
@@ -3134,6 +3154,31 @@ PODS:
     - ReactNativeDependencies
     - RNFBApp
     - Yoga
+  - RNFBMessaging (26.4.0):
+    - Firebase/Messaging (= 12.18.0)
+    - FirebaseCoreExtension (= 12.18.0)
+    - hermes-engine
+    - RCTRequired
+    - RCTTypeSafety
+    - React-bridging
+    - React-Core
+    - React-Core-prebuilt
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/core
+    - ReactNativeDependencies
+    - RNFBApp
+    - Yoga
   - RNGoogleSignin (16.1.5):
     - GoogleSignIn (~> 9.0)
     - hermes-engine
@@ -3298,6 +3343,7 @@ DEPENDENCIES:
   - "RNFBApp (from `../node_modules/@react-native-firebase/app`)"
   - "RNFBAuth (from `../node_modules/@react-native-firebase/auth`)"
   - "RNFBFirestore (from `../node_modules/@react-native-firebase/firestore`)"
+  - "RNFBMessaging (from `../node_modules/@react-native-firebase/messaging`)"
   - "RNGoogleSignin (from `../node_modules/@react-native-google-signin/google-signin`)"
   - RNScreens (from `../node_modules/react-native-screens`)
   - SocketRocket (from `build/rndeps-facades/SocketRocket`)
@@ -3318,7 +3364,10 @@ SPEC REPOS:
     - FirebaseCoreInternal
     - FirebaseFirestore
     - FirebaseFirestoreInternal
+    - FirebaseInstallations
+    - FirebaseMessaging
     - FirebaseSharedSwift
+    - GoogleDataTransport
     - GoogleSignIn
     - GoogleUtilities
     - "gRPC-C++"
@@ -3507,6 +3556,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-firebase/auth"
   RNFBFirestore:
     :path: "../node_modules/@react-native-firebase/firestore"
+  RNFBMessaging:
+    :path: "../node_modules/@react-native-firebase/messaging"
   RNGoogleSignin:
     :path: "../node_modules/@react-native-google-signin/google-signin"
   RNScreens:
@@ -3534,9 +3585,12 @@ SPEC CHECKSUMS:
   FirebaseCoreInternal: 93b2d5f9e184c6818a04433891c358b0720a6a38
   FirebaseFirestore: a319a7476f34b7f6a0c9e7b123e0506681cc1f1f
   FirebaseFirestoreInternal: fb923514fda3f48f61ffe588d662bc37a5c60bb2
+  FirebaseInstallations: 933b2747e8594084c9117b65e8358fce29d7ced7
+  FirebaseMessaging: 422bb80cbf8ff83e69e50bea4d4984fc4704f665
   FirebaseSharedSwift: 9d9404eea60b650d3e549898bfebbb8f665fe601
   fmt: ba0886e864ebb21d14c98b2e12e164b8002f5b93
   glog: 3cf7cb46f743c4bc758ae3e6d9c15bd1b4cfd6d4
+  GoogleDataTransport: a24e58982ab3ba2f64d79613e027fe7f57e88539
   GoogleSignIn: e449a40a92e9f2eea56e98b5214d13725dc5a00a
   GoogleUtilities: db34c1c11c6f2eccb6fab2340cb8ceb1451299dc
   "gRPC-C++": cc207623316fb041a7a3e774c252cf68a058b9e8
@@ -3629,6 +3683,7 @@ SPEC CHECKSUMS:
   RNFBApp: b2a6488cfc84694ae79abb10474c0aa030722246
   RNFBAuth: d428e3285d3480b0cb8fd9152e0b236d8022a919
   RNFBFirestore: 6aeedb6887d78859060986e852a68fad7c3c8da4
+  RNFBMessaging: 90bab2ad25b0e6fc61b1dda8e9dae53f48993a69
   RNGoogleSignin: 4f364ff45a50422c0b267176799471f58a54e2a8
   RNScreens: bde9caa682dae13ea095ec3c9bf8e91fe7eed618
   SocketRocket: 37aec555668fb852ec12e3c0de59a86ca58f0871
