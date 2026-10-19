@@ -1,7 +1,8 @@
-import { useCallback, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { Alert } from 'react-native';
 import {
-  hasAnsweredRoomNotifications,
+  getRoomNotificationAnswer,
+  resubscribeIfEnabled,
   setRoomNotifications,
 } from '../services/notificationsService';
 
@@ -25,13 +26,19 @@ function askYesNo(title: string, message: string): Promise<boolean> {
 export function useRoomNotificationPrompt(roomId: string, roomName: string) {
   const asked = useRef(false);
 
+  // If the user already said yes (maybe on another install), make sure this
+  // device is subscribed again. Fails quietly, e.g. on iOS without APNs
+  useEffect(() => {
+    resubscribeIfEnabled(roomId).catch(() => {});
+  }, [roomId]);
+
   return useCallback(async () => {
     if (asked.current) {
       return;
     }
     asked.current = true;
 
-    if (await hasAnsweredRoomNotifications(roomId)) {
+    if ((await getRoomNotificationAnswer(roomId)) !== null) {
       return;
     }
 

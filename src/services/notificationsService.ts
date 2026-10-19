@@ -33,12 +33,20 @@ function answerRef(roomId: string) {
   );
 }
 
-// Whether the user has already answered the notification question for this room
-export async function hasAnsweredRoomNotifications(
+// The user's saved answer for this room: true/false, or null if not asked yet
+export async function getRoomNotificationAnswer(
   roomId: string,
-): Promise<boolean> {
+): Promise<boolean | null> {
   const snapshot = await getDoc(answerRef(roomId));
-  return snapshot.exists();
+  return snapshot.exists() ? snapshot.data()?.enabled === true : null;
+}
+
+// The answer is stored per user, but the topic subscription belongs to the
+// device (it is lost on reinstall or a new phone). Subscribing again is safe
+export async function resubscribeIfEnabled(roomId: string): Promise<void> {
+  if ((await getRoomNotificationAnswer(roomId)) === true) {
+    await subscribeToTopic(messaging, roomTopic(roomId));
+  }
 }
 
 // Asks the operating system for permission to show notifications
